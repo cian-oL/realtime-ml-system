@@ -5,8 +5,10 @@ structures using Pydantic models for data validation.
 """
 
 from datetime import datetime
-from pydantic import BaseModel
+from time import sleep
 from typing import List
+
+from pydantic import BaseModel
 
 
 class Trade(BaseModel):
@@ -21,6 +23,20 @@ class Trade(BaseModel):
     volume: float
     timestamp: datetime
     timestamp_ms: int
+
+    def to_dict(self) -> dict:
+        """
+        transforms object into a dictionary
+
+        Returns:
+            dict: Dictionary of trade info for pipeline transfer
+        """
+        data = self.model_dump()
+        data["timestamp"] = (
+            self.timestamp.isoformat()
+        )  # because datetime.datetime is not JSON serializable
+
+        return data
 
 
 class KrakenMockAPI:
@@ -52,5 +68,8 @@ class KrakenMockAPI:
                 timestamp_ms=1676055060000,
             ),
         ]
+
+        # throttle mock data generation
+        sleep(1)
 
         return mock_trades
