@@ -8,38 +8,10 @@ from datetime import datetime
 from time import sleep
 from typing import List
 
-from pydantic import BaseModel
+from .trade import Trade
 
 
-class Trade(BaseModel):
-    """
-
-    Args:
-        BaseModel (_type_): _description_
-    """
-
-    pair: str
-    price: float
-    volume: float
-    timestamp: datetime
-    timestamp_ms: int
-
-    def to_dict(self) -> dict:
-        """
-        transforms object into a dictionary
-
-        Returns:
-            dict: Dictionary of trade info for pipeline transfer
-        """
-        data = self.model_dump()
-        data["timestamp"] = (
-            self.timestamp.isoformat()
-        )  # because datetime.datetime is not JSON serializable
-
-        return data
-
-
-class KrakenMockAPI:
+class KrakenMockApi:
     """
     API source: https://docs.kraken.com/api/docs/websocket-v2/trade
     """

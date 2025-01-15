@@ -9,4 +9,5 @@ dependencies = [
     "pydantic>=2.10.5",
     "pydantic-settings>=2.6.1",
     "quixstreams>=3.5.0",
+    "websocket-client>=1.8.0",
 ]

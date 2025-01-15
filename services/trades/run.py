@@ -1,16 +1,23 @@
+from typing import Union
 from loguru import logger
 from quixstreams import Application
 
-from src.kraken_api import KrakenMockAPI
+from kraken_api.mock import KrakenMockApi
+from kraken_api.websocket import KrakenWebsocketApi
 
 
-def main(kafka_broker_address, kafka_topic) -> None:
+def main(
+    kafka_broker_address: str,
+    kafka_topic: str,
+    kraken_api: Union[KrakenWebsocketApi, KrakenMockApi],
+):
     """
     Reads trades from Kraken API and pushes them to a topic.
 
     Args:
         kafka_broker_address: str
         kafka_topic: str
+        kraken_api: Union[KrakenWebsocketApi, KrakenMockApi]
 
     Returns:
         None
@@ -18,9 +25,6 @@ def main(kafka_broker_address, kafka_topic) -> None:
     """
 
     logger.info("Starting trades service")
-
-    # mock Kraken API
-    kraken_api = KrakenMockAPI(pair="BTC/USD")
 
     # initialise quixstreams application
     app = Application(broker_address=kafka_broker_address)
@@ -47,4 +51,7 @@ def main(kafka_broker_address, kafka_topic) -> None:
 if __name__ == "__main__":
     from config import config
 
-    main(config.kafka_broker_address, config.kafka_topic)
+    # initialise Kraken API
+    kraken_client = KrakenWebsocketApi(pairs=config.pairs)
+
+    main(config.kafka_broker_address, config.kafka_topic, kraken_client)
