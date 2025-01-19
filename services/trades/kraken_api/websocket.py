@@ -1,6 +1,7 @@
 import json
-
+from typing import List
 from websocket import create_connection
+
 from .trade import Trade
 
 
@@ -50,7 +51,18 @@ class KrakenWebsocketApi:
             List[Trade]: A list of trade objects
         """
 
-        # deserialise data from the websocket
-        data = json.loads(self.ws_client.recv)
+        # deserialise data from the websocket and extract trades data
+        data = json.loads(self.ws_client.recv())
+        data = data["data"]
 
-        pass
+        trades = [
+            Trade(
+                pair=trade["symbol"],
+                price=trade["price"],
+                volume=trade["qty"],
+                timestamp=trade["timestamp"],
+            )
+            for trade in data
+        ]
+
+        return trades

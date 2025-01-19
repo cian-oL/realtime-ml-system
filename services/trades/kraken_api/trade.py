@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 
 class Trade(BaseModel):
@@ -13,7 +13,13 @@ class Trade(BaseModel):
     price: float
     volume: float
     timestamp: datetime
-    timestamp_ms: int
+
+    @computed_field
+    def timestamp_ms(self) -> int:
+        """
+        Returns the timestamp in milliseconds
+        """
+        return int(self.timestamp.timestamp() * 1000)
 
     def to_dict(self) -> dict:
         """
@@ -22,6 +28,7 @@ class Trade(BaseModel):
         Returns:
             dict: Dictionary of trade info for pipeline transfer
         """
+
         data = self.model_dump()
         data["timestamp"] = (
             self.timestamp.isoformat()
