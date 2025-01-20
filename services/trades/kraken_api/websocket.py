@@ -1,5 +1,6 @@
 import json
 from typing import List
+from loguru import logger
 from websocket import create_connection
 
 from .trade import Trade
@@ -52,17 +53,27 @@ class KrakenWebsocketApi:
         """
 
         # deserialise data from the websocket and extract trades data
-        data = json.loads(self.ws_client.recv())
-        data = data["data"]
+        try:
+            data = json.loads(self.ws_client.recv())
+        except json.JSONDecodeError as err:
+            logger.error(f"Error decoding JSON: {err}")
+            return []
 
-        trades = [
-            Trade(
-                pair=trade["symbol"],
-                price=trade["price"],
-                volume=trade["qty"],
-                timestamp=trade["timestamp"],
-            )
-            for trade in data
-        ]
+        # handle received payloads without trades_data (channel == "heartbeat")
+        if data["channel"] == "heartbeat":
+            return []
 
-        return trades
+        if data["channel"] == "trade":
+            trades_data = data["data"]
+
+            trades = [
+                Trade(
+                    pair=trade["symbol"],
+                    price=trade["price"],
+                    volume=trade["qty"],
+                    timestamp=trade["timestamp"],
+                )
+                for trade in trades_data
+            ]
+
+            return trades

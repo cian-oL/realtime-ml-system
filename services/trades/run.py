@@ -38,14 +38,18 @@ def main(
         while True:
             trades = kraken_api.get_trades()
 
-            for trade in trades:
-                # serialize trades as bytes
-                message = topic.serialize(key=trade.pair, value=trade.to_dict())
+            if len(trades) > 0:
 
-                # push to topic
-                producer.produce(topic=topic.name, key=message.key, value=message.value)
+                for trade in trades:
+                    # serialize trades as bytes
+                    message = topic.serialize(key=trade.pair, value=trade.to_dict())
 
-                logger.info(f"Pushed trade to Kafka: {trade}")
+                    # push to topic
+                    producer.produce(
+                        topic=topic.name, key=message.key, value=message.value
+                    )
+
+                    logger.info(f"Pushed trade to Kafka: {trade}")
 
 
 if __name__ == "__main__":
