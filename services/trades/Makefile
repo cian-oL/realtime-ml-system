@@ -11,4 +11,6 @@ run: build
 	docker run -it \
 		--network redpanda_network \
 		-e KAFKA_BROKER_ADDRESS=redpanda-0:9092 \
+		-e KAFKA_TOPIC=trades \
+		-e PAIRS='["BTC/USD"]' \
 		trades
