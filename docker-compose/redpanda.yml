@@ -1,6 +1,7 @@
 name: redpanda-dev-cluster
 networks:
   redpanda_network:
+    name: redpanda_network # avoid unambiguous concatenated name
     driver: bridge
 volumes:
   redpanda-0: null
