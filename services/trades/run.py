@@ -34,12 +34,10 @@ def main(
 
     # Create a Producer instance
     with app.get_producer() as producer:
-
         while True:
             trades = kraken_api.get_trades()
 
             if len(trades) > 0:
-
                 for trade in trades:
                     # serialize trades as bytes
                     message = topic.serialize(key=trade.pair, value=trade.to_dict())
