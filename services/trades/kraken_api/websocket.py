@@ -1,5 +1,6 @@
 import json
 from typing import List
+
 from loguru import logger
 from websocket import create_connection
 
@@ -41,8 +42,6 @@ class KrakenWebsocketApi:
             _ = self.ws_client.recv()
             _ = self.ws_client.recv()
             i += 1
-
-        print(self.ws_client.recv())
 
     def get_trades(self) -> List[Trade]:
         """
