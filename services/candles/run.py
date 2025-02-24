@@ -35,11 +35,13 @@ def init_candle(trade: dict) -> dict:
     """
 
     return {
+        "pair": trade["pair"],
         "open": trade["price"],
         "high": trade["price"],
         "low": trade["price"],
         "close": trade["price"],
         "volume": trade["volume"],
+        "timestamp_ms": trade["timestamp_ms"],
     }
 
 
@@ -55,6 +57,8 @@ def update_candle(candle: dict, trade: dict) -> dict:
         dict: The updated candle.
     """
 
+    candle["pair"] = trade["pair"]
+    candle["timestamp_ms"] = trade["timestamp_ms"]
     candle["high"] = max(candle["high"], trade["price"])
     candle["low"] = min(candle["low"], trade["price"])
     candle["close"] = trade["price"]
@@ -104,8 +108,32 @@ def main(
         sdf.tumbling_window(timedelta(seconds=candle_seconds))
         .reduce(reducer=update_candle, initializer=init_candle)
         .current()
-        .to_topic(topic=candles_topic)
     )
+
+    # Extract candle data to new sdf
+    sdf["pair"] = sdf["value"]["pair"]
+    sdf["timestamp_ms"] = sdf["value"]["timestamp_ms"]
+    sdf["high"] = sdf["value"]["high"]
+    sdf["low"] = sdf["value"]["low"]
+    sdf["close"] = sdf["value"]["close"]
+    sdf["volume"] = sdf["value"]["volume"]
+    sdf["window_start_ms"] = sdf["start"]
+    sdf["window_end_ms"] = sdf["end"]
+
+    sdf = sdf[
+        [
+            "pair",
+            "timestamp_ms",
+            "high",
+            "low",
+            "close",
+            "volume",
+            "window_start_ms",
+            "window_end_ms",
+        ]
+    ]
+
+    sdf.to_topic(topic=candles_topic)
 
     # run the application
     app.run()
