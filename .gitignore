@@ -9,3 +9,6 @@ __pycache__/
 
 # dotenv variables
 .env
+
+# topic state
+state/
