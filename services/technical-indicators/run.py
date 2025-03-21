@@ -1,3 +1,4 @@
+from candle import update_candles
 from loguru import logger
 from quixstreams import Application
 
@@ -7,7 +8,6 @@ def main(
     kafka_input_topic: str,
     kafka_output_topic: str,
     kafka_consumer_group: str,
-    num_candles_in_state: int,
 ):
     """
     Service for ingesting candle data, computes indicator data, and pushing to a topic.
@@ -17,7 +17,7 @@ def main(
         kafka_input_topic (str): The name of the input topic.
         kafka_output_topic (str): The name of the output topic.
         kafka_consumer_group (str): The name of the consumer group.
-        num_candles_in_state (int): The number of candles to use for technical indicator calculations.
+        max_candles_in_state (int): The number of candles to use for technical indicator calculations.
 
     """
 
@@ -34,6 +34,9 @@ def main(
 
     # create a streaming dataframe from the input topic that pushes to output topic
     sdf = app.dataframe(topic=candles_topic)
+
+    sdf.apply(update_candles, stateful=True)
+    sdf.update(lambda value: logger.info(f"Candle: {value}"))
     sdf.to_topic(indicators_topic)
 
     # run the application
@@ -43,4 +46,9 @@ def main(
 if __name__ == "__main__":
     from config import config
 
-    main(main(**config.__dict__))
+    main(
+        kafka_broker_address=config.kafka_broker_address,
+        kafka_input_topic=config.kafka_input_topic,
+        kafka_output_topic=config.kafka_output_topic,
+        kafka_consumer_group=config.kafka_consumer_group,
+    )
