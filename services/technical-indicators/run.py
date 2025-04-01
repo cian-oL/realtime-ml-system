@@ -1,6 +1,7 @@
 from candle import update_candles
 from loguru import logger
 from quixstreams import Application
+from technical_indicators import compute_indicators
 
 
 def main(
@@ -35,8 +36,12 @@ def main(
     # create a streaming dataframe from the input topic that pushes to output topic
     sdf = app.dataframe(topic=candles_topic)
 
-    sdf.apply(update_candles, stateful=True)
-    sdf.update(lambda value: logger.info(f"Candle: {value}"))
+    sdf = (
+        sdf.apply(update_candles, stateful=True)
+        .apply(compute_indicators, stateful=True)
+        .update(lambda value: logger.info(f"Indicator data: {value}"))
+    )
+
     sdf.to_topic(indicators_topic)
 
     # run the application
