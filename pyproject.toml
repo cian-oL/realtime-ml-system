@@ -1,0 +1,14 @@
+[project]
+name = "realtime-ml-system"
+version = "0.1.0"
+description = "End-to-end prediction system for BTC prices"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "services/candles",
+    "services/technical-indicators",
+    "services/trades",
+]
